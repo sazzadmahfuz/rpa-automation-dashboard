@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPA Automation Dashboard — Sazzad Ibna Mahfuz</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#00FFD1;--purple:#7B61FF;--green:#22C55E;--red:#EF4444;--amber:#F59E0B;--bg:#07090D;--bg2:#0D1117;--bg3:#161B22;--border:rgba(0,255,209,0.12);--text:#E6EDF3;--muted:#7D8590}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+header{background:rgba(13,17,23,.95);border-bottom:0.5px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;backdrop-filter:blur(12px)}
+.logo{font-family:'Orbitron',monospace;font-size:.9rem;color:var(--cyan)}
+.live{display:flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.back{color:var(--muted);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:.75rem;transition:color .2s}.back:hover{color:var(--cyan)}
+main{max-width:1300px;margin:0 auto;padding:2rem}
+h1{font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;margin-bottom:.25rem}
+.subtitle{color:var(--muted);font-size:.85rem;font-family:'JetBrains Mono',monospace;margin-bottom:2rem}
+
+/* KPI CARDS */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--bg3);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--kc,var(--cyan))}
+.kpi-icon{font-size:1.4rem;margin-bottom:.4rem}
+.kpi-label{font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem}
+.kpi-val{font-family:'Orbitron',monospace;font-size:2rem;font-weight:700;color:var(--text)}
+.kpi-sub{font-size:.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+.kpi-delta{font-size:.72rem;font-family:'JetBrains Mono',monospace;margin-top:.3rem}
+.up{color:var(--green)}.dn{color:var(--red)}
+
+/* GRIDS */
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:2rem}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:2rem}
+@media(max-width:900px){.row2,.row3{grid-template-columns:1fr}}
+.card{background:var(--bg3);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem}
+.card-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.chart-wrap{position:relative;height:240px}
+
+/* PROCESS TABLE */
+.proc-table{width:100%;border-collapse:collapse}
+.proc-table th{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:.5rem .75rem;text-align:left;border-bottom:0.5px solid var(--border)}
+.proc-table td{padding:.65rem .75rem;font-size:.82rem;border-bottom:0.5px solid rgba(255,255,255,.04)}
+.proc-table tr:last-child td{border-bottom:none}
+.proc-table tr:hover td{background:rgba(255,255,255,.02)}
+.status-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .6rem;border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:.65rem}
+.s-running{background:rgba(0,255,209,.1);color:var(--cyan);border:0.5px solid rgba(0,255,209,.25)}
+.s-success{background:rgba(34,197,94,.1);color:var(--green);border:0.5px solid rgba(34,197,94,.25)}
+.s-failed{background:rgba(239,68,68,.1);color:var(--red);border:0.5px solid rgba(239,68,68,.25)}
+.s-idle{background:rgba(125,133,144,.1);color:var(--muted);border:0.5px solid rgba(125,133,144,.2)}
+.bar-mini{height:4px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;width:80px;display:inline-block;vertical-align:middle}
+.bar-mini-fill{height:100%;border-radius:99px}
+
+/* LOG */
+.log-box{font-family:'JetBrains Mono',monospace;font-size:.7rem;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:.1rem}
+.log-box::-webkit-scrollbar{width:3px}.log-box::-webkit-scrollbar-thumb{background:var(--border)}
+.log-line{display:flex;gap:.75rem;padding:.3rem 0;border-bottom:0.5px solid rgba(255,255,255,.03)}
+.log-ts{color:var(--muted);min-width:55px;flex-shrink:0}
+.log-proc{color:var(--purple);min-width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log-msg{color:var(--text);flex:1}
+.lv-ok{color:var(--green)}.lv-err{color:var(--red)}.lv-warn{color:var(--amber)}.lv-info{color:var(--cyan)}
+
+/* RUN BUTTON */
+.run-btn{padding:.4rem 1rem;border:0.5px solid rgba(0,255,209,.3);border-radius:6px;background:rgba(0,255,209,.06);color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .2s}
+.run-btn:hover{background:rgba(0,255,209,.15)}
+
+footer{text-align:center;padding:2rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+footer a{color:var(--cyan);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">RPA MONITOR</div>
+  <div class="live"><div class="dot"></div>4 bots active</div>
+  <a href="../../index.html" class="back">← Portfolio</a>
+</header>
+<main>
+  <h1>RPA Automation Dashboard</h1>
+  <p class="subtitle">// Robotic Process Automation — Robocorp / Python · HAMK Software Course</p>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi" style="--kc:var(--green)">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-label">Tasks Completed</div>
+      <div class="kpi-val" id="kpi-done">0</div>
+      <div class="kpi-sub">last 24 hours</div>
+      <div class="kpi-delta up" id="kpi-done-d">↑ —</div>
+    </div>
+    <div class="kpi" style="--kc:var(--cyan)">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Success Rate</div>
+      <div class="kpi-val" id="kpi-rate">—%</div>
+      <div class="kpi-sub">all workflows</div>
+      <div class="kpi-delta" id="kpi-rate-d">— —</div>
+    </div>
+    <div class="kpi" style="--kc:var(--purple)">
+      <div class="kpi-icon">⏱️</div>
+      <div class="kpi-label">Time Saved</div>
+      <div class="kpi-val" id="kpi-time">—h</div>
+      <div class="kpi-sub">vs manual</div>
+      <div class="kpi-delta up" id="kpi-time-d">↑ —</div>
+    </div>
+    <div class="kpi" style="--kc:var(--red)">
+      <div class="kpi-icon">❌</div>
+      <div class="kpi-label">Exceptions</div>
+      <div class="kpi-val" id="kpi-err">—</div>
+      <div class="kpi-sub">last 24 hours</div>
+      <div class="kpi-delta" id="kpi-err-d">— —</div>
+    </div>
+    <div class="kpi" style="--kc:var(--amber)">
+      <div class="kpi-icon">🤖</div>
+      <div class="kpi-label">Active Bots</div>
+      <div class="kpi-val" id="kpi-bots">4</div>
+      <div class="kpi-sub">of 6 configured</div>
+      <div class="kpi-delta up">↑ 1 since yesterday</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Hourly task throughput (24h) <button class="run-btn" onclick="refreshData()">↻ Refresh</button></div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Task outcome breakdown</div>
+      <div class="chart-wrap"><canvas id="doughnutChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- PROCESS TABLE + BAR CHART -->
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Workflow status</div>
+      <table class="proc-table" id="procTable"></table>
+    </div>
+    <div class="card">
+      <div class="card-title">Success rate by workflow</div>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="card">
+    <div class="card-title">Live event log <button class="run-btn" onclick="clearLog()">Clear</button></div>
+    <div class="log-box" id="logBox"></div>
+  </div>
+</main>
+<footer>RPA Dashboard · <a href="https://github.com/sazzadmahfuz/rpa-automation-dashboard">github.com/sazzadmahfuz</a> · Robocorp / Python</footer>
+
+<script>
+// ── DATA ──
+const workflows=[
+  {name:'Web Scraper',     runs:340, success:320, avgMs:4200, status:'running'},
+  {name:'Form Filler',     runs:210, success:183, avgMs:8100, status:'success'},
+  {name:'Report Generator',runs:95,  success:95,  avgMs:12400,status:'running'},
+  {name:'Email Bot',       runs:178, success:138, avgMs:3200, status:'idle'},
+  {name:'Invoice Parser',  runs:62,  success:58,  avgMs:6700, status:'failed'},
+  {name:'DB Sync',         runs:44,  success:44,  avgMs:15000,status:'success'},
+];
+const HOURS=Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`);
+let hourlyDone=Array.from({length:24},()=>Math.floor(10+Math.random()*40));
+let hourlyErr= Array.from({length:24},()=>Math.floor(Math.random()*4));
+
+// ── KPI ──
+function refreshKPIs(){
+  const done=workflows.reduce((s,w)=>s+w.runs,0);
+  const suc=workflows.reduce((s,w)=>s+w.success,0);
+  const err=done-suc;
+  const rate=((suc/done)*100).toFixed(1);
+  const saved=Math.round(workflows.reduce((s,w)=>s+(w.runs*w.avgMs/1000/60),0)/60);
+  document.getElementById('kpi-done').textContent=done;
+  document.getElementById('kpi-done-d').textContent=`↑ +${Math.floor(done*.12)} vs yesterday`;
+  document.getElementById('kpi-rate').textContent=rate+'%';
+  document.getElementById('kpi-rate-d').className='kpi-delta '+(rate>=90?'up':'dn');
+  document.getElementById('kpi-rate-d').textContent=(rate>=90?'↑':' ')+'  target: 90%';
+  document.getElementById('kpi-time').textContent=saved+'h';
+  document.getElementById('kpi-time-d').textContent=`↑ +${Math.round(saved*.08)}h this week`;
+  document.getElementById('kpi-err').textContent=err;
+  document.getElementById('kpi-err-d').className='kpi-delta '+(err<20?'up':'dn');
+  document.getElementById('kpi-err-d').textContent=(err<20?'↓ low':'↑ high')+' — target <20';
+}
+
+// ── CHARTS ──
+Chart.defaults.color='#7D8590';Chart.defaults.font.family='JetBrains Mono';Chart.defaults.font.size=10;
+
+const lineChart=new Chart(document.getElementById('lineChart').getContext('2d'),{
+  type:'line',
+  data:{labels:HOURS,datasets:[
+    {label:'Completed',data:hourlyDone,borderColor:'#00FFD1',backgroundColor:'rgba(0,255,209,.07)',borderWidth:2,pointRadius:2,fill:true,tension:.4},
+    {label:'Errors',   data:hourlyErr, borderColor:'#EF4444',backgroundColor:'rgba(239,68,68,.07)',borderWidth:1.5,pointRadius:2,fill:true,tension:.4},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},plugins:{legend:{labels:{color:'#7D8590',boxWidth:10}}},scales:{x:{ticks:{maxTicksLimit:8},grid:{color:'rgba(255,255,255,.04)'}},y:{grid:{color:'rgba(255,255,255,.04)'}}}}
+});
+
+const total=workflows.reduce((s,w)=>s+w.runs,0);
+const succ=workflows.reduce((s,w)=>s+w.success,0);
+const doughnutChart=new Chart(document.getElementById('doughnutChart').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:['Success','Exception','Running'],datasets:[{data:[succ,total-succ-12,12],backgroundColor:['rgba(0,255,209,.7)','rgba(239,68,68,.7)','rgba(123,97,255,.7)'],borderColor:['#00FFD1','#EF4444','#7B61FF'],borderWidth:1.5}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#7D8590',padding:12,boxWidth:10}}},cutout:'65%'}
+});
+
+const barChart=new Chart(document.getElementById('barChart').getContext('2d'),{
+  type:'bar',
+  data:{labels:workflows.map(w=>w.name.split(' ')[0]),datasets:[{label:'Success %',data:workflows.map(w=>+((w.success/w.runs)*100).toFixed(1)),backgroundColor:workflows.map(w=>w.success/w.runs>.9?'rgba(0,255,209,.6)':w.success/w.runs>.75?'rgba(245,158,11,.6)':'rgba(239,68,68,.6)'),borderRadius:4}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{min:0,max:100,grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>v+'%'}}}}
+});
+
+// ── TABLE ──
+function renderTable(){
+  const t=document.getElementById('procTable');
+  t.innerHTML=`<thead><tr><th>Workflow</th><th>Runs</th><th>Success</th><th>Rate</th><th>Avg Time</th><th>Status</th></tr></thead>`;
+  const tb=document.createElement('tbody');
+  workflows.forEach(w=>{
+    const rate=((w.success/w.runs)*100).toFixed(0);
+    const color=rate>=90?'#00FFD1':rate>=75?'#F59E0B':'#EF4444';
+    const ms=w.avgMs>=1000?(w.avgMs/1000).toFixed(1)+'s':w.avgMs+'ms';
+    const sClass={running:'s-running',success:'s-success',failed:'s-failed',idle:'s-idle'}[w.status];
+    const sDot={running:'🟢',success:'✅',failed:'🔴',idle:'⚪'}[w.status];
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${w.name}</td><td>${w.runs}</td><td>${w.success}</td>
+      <td><span style="color:${color};font-family:'JetBrains Mono',monospace;font-size:.78rem">${rate}%</span>
+          <span class="bar-mini" style="margin-left:6px"><span class="bar-mini-fill" style="width:${rate}%;background:${color}"></span></span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted)">${ms}</td>
+      <td><span class="status-pill ${sClass}">${sDot} ${w.status}</span></td>`;
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+
+// ── LOG ──
+const logBox=document.getElementById('logBox');
+const logMessages=[
+  ['Web Scraper','Scraped 48 product listings successfully','ok'],
+  ['Form Filler','Exception: element not found — retrying','err'],
+  ['Report Generator','PDF report generated: Q2_summary.pdf','ok'],
+  ['Email Bot','Sent 12 notification emails','ok'],
+  ['Invoice Parser','Warning: low confidence OCR on page 3','warn'],
+  ['DB Sync','Synced 340 records to PostgreSQL','ok'],
+  ['Web Scraper','Rate limit hit — backing off 30s','warn'],
+  ['Form Filler','Login successful, starting form batch','info'],
+  ['Report Generator','Fetching data from API…','info'],
+  ['Email Bot','SMTP auth failed — retrying','err'],
+];
+let logI=0;
+function addLog(){
+  const [proc,msg,lv]=logMessages[logI%logMessages.length];logI++;
+  const now=new Date();const ts=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const d=document.createElement('div');d.className='log-line';
+  d.innerHTML=`<span class="log-ts">${ts}</span><span class="log-proc">${proc}</span><span class="log-msg lv-${lv}">${msg}</span>`;
+  logBox.prepend(d);
+  if(logBox.children.length>60)logBox.lastChild.remove();
+}
+function clearLog(){logBox.innerHTML=''}
+
+function refreshData(){
+  hourlyDone=Array.from({length:24},()=>Math.floor(10+Math.random()*45));
+  hourlyErr= Array.from({length:24},()=>Math.floor(Math.random()*5));
+  lineChart.data.datasets[0].data=hourlyDone;
+  lineChart.data.datasets[1].data=hourlyErr;
+  lineChart.update();
+  workflows.forEach(w=>{w.runs+=Math.floor(Math.random()*5);w.success+=Math.floor(Math.random()*4)});
+  barChart.data.datasets[0].data=workflows.map(w=>+((w.success/w.runs)*100).toFixed(1));
+  barChart.update();
+  refreshKPIs();renderTable();
+}
+
+refreshKPIs();renderTable();
+for(let i=0;i<8;i++)addLog();
+setInterval(addLog,3000);
+setInterval(()=>{
+  const h=new Date().getHours();
+  hourlyDone[h]+=Math.floor(Math.random()*3);
+  lineChart.data.datasets[0].data=hourlyDone;
+  lineChart.update('none');
+},4000);
+</script>
+</body>
+</html>
