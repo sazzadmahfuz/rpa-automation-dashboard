@@ -38,9 +38,6 @@ The application visualises:
 - Real-time process logs
 - Operational status of multiple bots
 
-The project was developed as part of the:
-
-### Software Application Development & Robotic Process Automation coursework **Häme University of Applied Sciences (HAMK)**
 
 using:
 
@@ -604,6 +601,10 @@ Potential future extensions include:
 
 ---
 
+### Academic Context
+
+**Course**: Software Application Development / Robotic Process Automation  
+**Programme**: BEng ICT & Robotics, HAMK University of Applied Sciences  
 
 ### Topics Covered
 
@@ -681,6 +682,7 @@ while reflecting real industrial RPA monitoring workflows used in modern automat
 
 **Sazzad Ibna Mahfuz** — BEng ICT & Robotics, HAMK · Robocorp Certified  
 [Portfolio](https://sazzadmahfuz.github.io) · [LinkedIn](https://www.linkedin.com/in/sazzad-mahfuz) · [GitHub](https://github.com/sazzadmahfuz)
+
 
 
 <div align="center">
