@@ -1,4 +1,4 @@
-# 🤖 RPA Process Automation Dashboard
+# RPA Process Automation Dashboard
 
 <div align="center">
 
