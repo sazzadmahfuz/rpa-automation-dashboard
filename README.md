@@ -12,8 +12,18 @@
 > **Project for Software Application Development & RPA — HAMK University of Applied Sciences**  
 > Advanced monitoring dashboard for Robotic Process Automation workflows — visualising task execution analytics, workflow stability, automation throughput, operational KPIs, and exception monitoring across multiple software bots using Robocorp-inspired automation architecture.
 
+---
+
+### Developed by
+
+# Sazzad Ibna Mahfuz
+
+Bachelor of Engineering — ICT Robotics  
+Häme University of Applied Sciences (HAMK), Finland
+
 </div>
 
+---
 ---
 
 ## Project Overview
